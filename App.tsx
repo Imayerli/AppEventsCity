@@ -4,11 +4,13 @@ import {createNativeStackNavigator} from "@react-navigation/native-stack"
 export type RootStackPramList = {
   LogIn: undefined;
   ScreenHome: undefined;
+  ScreenEvents:undefined;
 }
 const Stack = createNativeStackNavigator<RootStackPramList>()
 
 import ScreenLogIn from './src/Screens/Login/ScreenLogIn';
 import ScreenHome from "./src/Screens/Home/ScreenHome";
+import ScreenEvents from "./src/Screens/Events/ScreenEvents";
 
 function App(): JSX.Element {
 
@@ -27,6 +29,13 @@ function App(): JSX.Element {
             component={ScreenHome}
             options={{
                 title: "ScreenHome"
+            }}
+        />
+        <Stack.Screen
+            name="ScreenEvents"
+            component={ScreenEvents}
+            options={{
+                title: "ScreenEvents"
             }}
         />
         </Stack.Navigator>
