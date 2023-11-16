@@ -1,37 +1,39 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
+import React from "react";
+import {NavigationContainer} from "@react-navigation/native"
+import {createNativeStackNavigator} from "@react-navigation/native-stack"
+export type RootStackPramList = {
+  LogIn: undefined;
+  ScreenHome: undefined;
+}
+const Stack = createNativeStackNavigator<RootStackPramList>()
 
-import React from 'react';
-import LogIn from './components/LogIn';
-import {
-  SafeAreaView,
-  StyleSheet,
-  Text
-} from 'react-native';
+import ScreenLogIn from './src/Screens/Login/ScreenLogIn';
+import ScreenHome from "./src/Screens/Home/ScreenHome";
 
 function App(): JSX.Element {
+
   return (
-    <SafeAreaView style={styles.container}>
-      <Text style={styles.texto}> HOLA MUNDO </Text>
-    </SafeAreaView>
+      <NavigationContainer>
+        <Stack.Navigator initialRouteName='LogIn'>
+          <Stack.Screen
+              name="LogIn"
+              component={ScreenLogIn}
+              options={{
+                title: "Trending Products"
+              }}
+          />
+        <Stack.Screen
+            name="ScreenHome"
+            component={ScreenHome}
+            options={{
+                title: "ScreenHome"
+            }}
+        />
+        </Stack.Navigator>
+      </NavigationContainer>
   );
 }
 
 export default App;
 
-const styles =  StyleSheet.create({
-  container:{
-    flex:1,
-    alignContent:'center',
-    justifyContent:'center',
-  },
-  texto:{
-    flex:1,
-    fontSize:36
-  }
-}
-)
+
