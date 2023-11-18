@@ -13,16 +13,35 @@ import {
     Alert,
     Modal,
     Pressable,
+    FlatList
 } from "react-native";
 import React, {useState} from 'react';
 import {NativeStackScreenProps} from "@react-navigation/native-stack";
 import {RootStackPramList} from "../../../App";
 import ScreenHome from "../Home/ScreenHome";
-
 type EventsProps = NativeStackScreenProps<RootStackPramList, "ScreenEvents">
+type ItemData = {
+    title: string;
+    description: string;
+    time: string;
+    city: string;
+    img: string;
+};
+const eventsListGenerated: ItemData[] = [];
+type ItemProps = {
+    item: ItemData;
+};
 
+const Item = ({item}: ItemProps) =>  (
+    <View style={styles.container}>
+        <View style={[styles.card, styles.cardOne]}><Text>{item.title}</Text></View>
+        <View style={[styles.card, styles.cardTwo]}><Text>{item.img}</Text></View>
+        <View style={[styles.card, styles.cardThree]}><Text>{item.city}</Text></View>
+    </View>
+);
 
 export default function ScreenEvents({navigation}: EventsProps): JSX.Element {
+    const [selectedId, setSelectedId] = useState<string>();
     const [modalVisible, setModalVisible] = useState(false);
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
@@ -54,6 +73,39 @@ export default function ScreenEvents({navigation}: EventsProps): JSX.Element {
             })
             .catch(error => console.log(error))
     }
+
+    const searchEvent = async () => {
+        const response = fetch('https://poetic-starlight-7b9552.netlify.app/.netlify/functions/getEvents?city=Barranquilla', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+
+        })
+            .then(res => res.json())
+            .then(async (res) => {
+                console.log(res)
+                for (let i = 0; i < res; i++) {
+                    eventsListGenerated.push(res)
+                }
+            })
+            .catch((error) => {
+                Alert.alert(JSON.stringify(error));
+                console.error(error);
+            });
+
+    }
+
+
+
+    const renderItem = ({item}: {item: ItemData}) => {
+        return (
+            <Item
+                item={item}
+            />
+        );
+    };
+
     return (
         <ScrollView>
             <Modal
@@ -127,37 +179,15 @@ export default function ScreenEvents({navigation}: EventsProps): JSX.Element {
                 <Text style={styles.textStyle}>Crear Evento</Text>
             </Pressable>
         <View>
-            {/* CONTENEDOR DE TARJETAS */}
-            <View style={styles.container}>
-                <View style={[styles.card,styles.cardOne]}><Text>1</Text></View>
-                <View style={[styles.card,styles.cardTwo]}><Text>2</Text></View>
-                <View style={[styles.card,styles.cardThree]}><Text>3</Text></View>
-            </View>
-            <View style={styles.container}>
-                <View style={[styles.card,styles.cardOne]}><Text>1</Text></View>
-                <View style={[styles.card,styles.cardTwo]}><Text>2</Text></View>
-                <View style={[styles.card,styles.cardThree]}><Text>3</Text></View>
-            </View>
-            <View style={styles.container}>
-                <View style={[styles.card,styles.cardOne]}><Text>1</Text></View>
-                <View style={[styles.card,styles.cardTwo]}><Text>2</Text></View>
-                <View style={[styles.card,styles.cardThree]}><Text>3</Text></View>
-            </View>
-            <View style={styles.container}>
-                <View style={[styles.card,styles.cardOne]}><Text>1</Text></View>
-                <View style={[styles.card,styles.cardTwo]}><Text>2</Text></View>
-                <View style={[styles.card,styles.cardThree]}><Text>3</Text></View>
-            </View>
-            <View style={styles.container}>
-                <View style={[styles.card,styles.cardOne]}><Text>1</Text></View>
-                <View style={[styles.card,styles.cardTwo]}><Text>2</Text></View>
-                <View style={[styles.card,styles.cardThree]}><Text>3</Text></View>
-            </View>
-            <View style={styles.container}>
-                <View style={[styles.card,styles.cardOne]}><Text>1</Text></View>
-                <View style={[styles.card,styles.cardTwo]}><Text>2</Text></View>
-                <View style={[styles.card,styles.cardThree]}><Text>3</Text></View>
-            </View>
+            <FlatList
+                data={eventsListGenerated}
+                renderItem={renderItem}
+                keyExtractor={item => item.id}
+                extraData={selectedId}
+            />
+            {eventsListGenerated}
+
+
         </View>
         </ScrollView>
         /**/
