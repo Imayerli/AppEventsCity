@@ -1,53 +1,69 @@
 import {
-    SafeAreaView,
     Text,
     View,
     StyleSheet,
     TextInput,
-    Button,
-    TouchableOpacity,
-    Image,
-    StatusBar,
-    StatusBarStyle,
-    ScrollView,
     Alert,
     Modal,
     Pressable,
-    FlatList
+    FlatList,
 } from "react-native";
-import React, {useState} from 'react';
+import { Picker } from '@react-native-picker/picker';
+import React, {useEffect, useState} from 'react';
 import {NativeStackScreenProps} from "@react-navigation/native-stack";
+import {Card,Icon } from '@rneui/themed';
 import {RootStackPramList} from "../../../App";
-import ScreenHome from "../Home/ScreenHome";
+
 type EventsProps = NativeStackScreenProps<RootStackPramList, "ScreenEvents">
 type ItemData = {
+    _id: string;
     title: string;
     description: string;
     time: string;
     city: string;
     img: string;
 };
-const eventsListGenerated: ItemData[] = [];
+
 type ItemProps = {
     item: ItemData;
 };
 
 const Item = ({item}: ItemProps) =>  (
-    <View style={styles.container}>
-        <View style={[styles.card, styles.cardOne]}><Text>{item.title}</Text></View>
-        <View style={[styles.card, styles.cardTwo]}><Text>{item.img}</Text></View>
-        <View style={[styles.card, styles.cardThree]}><Text>{item.city}</Text></View>
-    </View>
+    <Card>
+        <Card.Title>{item.title}</Card.Title>
+        <Card.Divider />
+        <Card.Image
+            style={{ padding: 0 }}
+            source={{ uri: item.img ,}}
+        />
+        <Text style={{ marginBottom: 10 }}>
+            Descripcion: {item.description}
+        </Text>
+        <Text style={{ marginBottom: 10 }}>
+            Fechas: {item.time}
+        </Text>
+        <Text style={{ marginBottom: 10 }}>
+            Ciudad: {item.city}
+        </Text>
+
+    </Card>
 );
 
-export default function ScreenEvents({navigation}: EventsProps): JSX.Element {
-    const [selectedId, setSelectedId] = useState<string>();
+
+
+export default function ScreenEvents({navigation,route }: EventsProps): JSX.Element {
+    const { selectedCity } = route.params;
+    const [eventsListGenerated, setEventsListGenerated] = useState<ItemData[]>([]);
     const [modalVisible, setModalVisible] = useState(false);
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
     const [time, setTime] = useState("");
     const [city, setCity] = useState("");
     const [img, setImg] = useState("");
+    useEffect(() => {
+        searchEvent();
+        console.log("renderizado");
+    }, []);
     const crearEvento = async () => {
         fetch(`https://poetic-starlight-7b9552.netlify.app/.netlify/functions/events`, {
             method: 'POST',
@@ -61,12 +77,12 @@ export default function ScreenEvents({navigation}: EventsProps): JSX.Element {
                 console.log(res)
                 if (res.acknowledged === true) {
                     Alert.alert('Evento Creado! ', 'El Evento fue creado Correcatamente', [
-                        {text: 'OK', onPress: () => console.log('OK Pressed')},
+                        {text: 'OK', onPress: () => handleCityPress(selectedCity)},
                     ]);
 
                 } else {
                     Alert.alert('Evento No Creado! ', 'El Evento no fue creado Correcatamente', [
-                        {text: 'OK', onPress: () => console.log('OK Pressed')},
+                        {text: 'OK', onPress: () => handleCityPress(selectedCity)},
                     ]);
                 }
 
@@ -74,20 +90,25 @@ export default function ScreenEvents({navigation}: EventsProps): JSX.Element {
             .catch(error => console.log(error))
     }
 
-    const searchEvent = async () => {
-        const response = fetch('https://poetic-starlight-7b9552.netlify.app/.netlify/functions/getEvents?city=Barranquilla', {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+    const handleCityPress = (item) => {
+        navigation.navigate('ScreenEvents', { selectedCity: item });
+    };
 
-        })
+    const searchEvent = async () => {
+        const baseURL = 'https://poetic-starlight-7b9552.netlify.app/.netlify/functions/getEvents';
+
+        // Combina la URL base con el dato de la ciudad
+        const url = `${baseURL}?city=${selectedCity}`;
+        fetch(url, {
+        method: 'POST',
+        headers: {
+            "Content-Type": 'application/json'
+        }
+    })
             .then(res => res.json())
             .then(async (res) => {
                 console.log(res)
-                for (let i = 0; i < res; i++) {
-                    eventsListGenerated.push(res)
-                }
+                setEventsListGenerated(res);
             })
             .catch((error) => {
                 Alert.alert(JSON.stringify(error));
@@ -96,8 +117,6 @@ export default function ScreenEvents({navigation}: EventsProps): JSX.Element {
 
     }
 
-
-
     const renderItem = ({item}: {item: ItemData}) => {
         return (
             <Item
@@ -105,9 +124,16 @@ export default function ScreenEvents({navigation}: EventsProps): JSX.Element {
             />
         );
     };
+    const cityData = [
+        { id: '1', city: 'Bogota' },
+        { id: '2', city: 'Medellin' },
+        { id: '3', city: 'Barranquilla' },
+        { id: '4', city: 'Cucuta' },
+        { id: '5', city: 'Cali' },
+    ];
 
     return (
-        <ScrollView>
+        <View>
             <Modal
                 animationType="slide"
                 transparent={true}
@@ -144,12 +170,17 @@ export default function ScreenEvents({navigation}: EventsProps): JSX.Element {
                             />
                         </View>
                         <View style={styles.inputView}>
-                            <TextInput
-                                style={styles.TextInput}
-                                placeholder="Ciuddad."
-                                placeholderTextColor="#003f5c"
-                                onChangeText={(city) => setCity(city)}
-                            />
+                            <Picker
+                                style={{ height: 50, width: 320 }}
+                                selectedValue={city}
+                                onValueChange={(itemValue) => setCity(itemValue)}
+                            >
+                                <Picker.Item label="Selecciona una ciudad" value="" />
+                                {cityData.map((cityItem) => (
+                                    <Picker.Item key={cityItem.id} label={cityItem.city} value={cityItem.city} />
+                                ))}
+                            </Picker>
+
                         </View>
                         <View style={styles.inputView}>
                             <TextInput
@@ -178,19 +209,13 @@ export default function ScreenEvents({navigation}: EventsProps): JSX.Element {
                 onPress={() => setModalVisible(true)}>
                 <Text style={styles.textStyle}>Crear Evento</Text>
             </Pressable>
-        <View>
+
             <FlatList
                 data={eventsListGenerated}
                 renderItem={renderItem}
-                keyExtractor={item => item.id}
-                extraData={selectedId}
+                keyExtractor={item => item._id}
             />
-            {eventsListGenerated}
-
-
         </View>
-        </ScrollView>
-        /**/
     );
 }
 
