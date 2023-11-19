@@ -6,7 +6,7 @@ import {
     StyleSheet,
     TextInput,
     Button,
-    TouchableOpacity, Image, StatusBar, StatusBarStyle,
+    TouchableOpacity, Image, StatusBar, StatusBarStyle, Alert,
 } from "react-native";
 import { NavigationContainer, useNavigationContainerRef } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -75,7 +75,10 @@ export default function ScreenLogIn({navigation}: LoginProps): JSX.Element {
                     //navigationRef.navigate(name, params);
                     navigation.navigate('ScreenHome')
                 } else {
-                    console.log("Parametros incorrectos")
+                    Alert.alert('Error de Inicio de sesion ', 'Parametros ingresados incorrectos', [
+                        {text: 'Cerrar', onPress: () =>  console.log("Parametros incorrectos")},
+                    ]);
+
                 }
 
             })

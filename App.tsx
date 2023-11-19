@@ -21,7 +21,7 @@ function App(): JSX.Element {
               name="LogIn"
               component={ScreenLogIn}
               options={{
-                title: "Trending Products"
+                title: "Events Life"
               }}
           />
         <Stack.Screen

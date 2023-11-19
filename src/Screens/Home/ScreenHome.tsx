@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {NativeStackScreenProps} from "@react-navigation/native-stack";
 import {RootStackPramList} from "../../../App";
 import {View, ScrollView, StyleSheet } from 'react-native';
@@ -8,20 +8,25 @@ type HomeProps = NativeStackScreenProps<RootStackPramList, "ScreenHome">
 
 
 export default function ScreenHome({navigation}: HomeProps): JSX.Element {
+    const cityData = [
+        { id: '1', city: 'Bogota' },
+        { id: '2', city: 'Medellin' },
+        { id: '3', city: 'Barranquilla' },
+        { id: '4', city: 'Cucuta' },
+        { id: '5', city: 'Cali' },
+    ];
+
+    const handleCityPress = (item) => {
+        navigation.navigate('ScreenEvents', { selectedCity: item });
+    };
 
     return (
         <ScrollView>
             <View style={styles.container}>
+                {cityData.map((data) => (
                 <Card>
-                    <Card.Title>Eventos </Card.Title>
+                    <Card.Title>{data.city}</Card.Title>
                     <Card.Divider />
-                    <Card.Image
-                        style={{ padding: 0 }}
-                        source={{
-                            uri:
-                                'https://awildgeographer.files.wordpress.com/2015/02/john_muir_glacier.jpg',
-                        }}
-                    />
                     <Text style={{ marginBottom: 10 }}>
                         Aqui encontraras todos los Eventos disponibles !!!
                     </Text>
@@ -41,11 +46,10 @@ export default function ScreenHome({navigation}: HomeProps): JSX.Element {
                         }}
                         title="IR A EVENTOS"
 
-                        onPress={() => {
-                            navigation.navigate('ScreenEvents')
-                        }}
+                        onPress={() => handleCityPress(data.city)}
                     />
                 </Card>
+                ))}
             </View>
         </ScrollView>
 );
